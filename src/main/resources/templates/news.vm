@@ -1,0 +1,57 @@
+<html>
+<body>
+<pre>
+Hello VM.
+
+## 你看不到我
+
+#*
+#是语言的基础
+这里都看不到
+velocity语法非常像java
+*#
+
+value1:$!{value1}
+$!{value2}##加！如果不存在的话不会在网页上显示出来
+${value3}## 不存在的话也会显示出来
+
+#foreach ($color in $colors)##for遍历
+Color $!{foreach.index}/$!{foreach.count}: $!{color}##第一个是角标，第二个是顺序数
+#end
+
+#foreach($key in $map.keySet())
+Number $!{foreach.index}/$!{foreach.count}: $!{key} $map.get($key)
+#end
+
+#foreach($kv in $map.entrySet())##返回的是一个kv集合，和上面一个代码是一样的。
+Number $!{foreach.index}/$!{foreach.count}: $!{kv.key} $!{kv.value}
+#end
+
+
+User:$!{user.name}
+User:$!{user.getName()}##调用了自定义类的方法。
+
+#set($title = "nowcoder")##在VM定义临时的变量
+Include: #include("header.vm") <br>##把header.vm包含进来，存粹的把那一段文本包含进来
+Parse:#parse("header.vm")##把header.vm包含进来，还要进行一定的编译转化。变量解析
+
+#macro (render_color, $color, $index)##用来定义一些函数
+Color By Macro $index, $color
+#end
+
+#foreach ($color in $colors)##调用函数
+    #render_color($color, $foreach.index)
+#end
+
+#set($hello = "hello")
+#set($hworld1 = "$!{hello} world")##直接把前面的变量拿起来用，“”里面的东西才会对模板进行解析
+#set($hworld2 = '$!{hello} world')
+
+hworld1:$hworld1
+hworld2:$hworld2
+
+$!{colors.size()}
+
+</pre>
+</body>
+</html>
