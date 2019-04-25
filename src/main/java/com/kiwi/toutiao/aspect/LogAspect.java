@@ -17,12 +17,12 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class LogAspect {
-//    用于写日志。
+    /**用于写日志*/
     private static final Logger logger = LoggerFactory.getLogger(LogAspect.class);
 
-//    执行所以controller方法前都要调用该方法，（）里面用来指定目标，前面的则为正则表达式。
+   /**执行所以controller方法前都要调用该方法，（）里面用来指定目标，前面的则为正则表达式。
+    * joinPoint为切点，用来打印单个参数。*/
     @Before("execution(* com.kiwi.toutiao.controller.*Controller.*(..))")
-//    joinPoint为切点，用来打印单个参数。
     public void beforeMethod(JoinPoint joinPoint){
         StringBuilder sb = new StringBuilder();
         for (Object arg : joinPoint.getArgs()){
@@ -31,7 +31,7 @@ public class LogAspect {
         logger.info("before method: " + sb.toString());
     }
 
-//    执行indexcontroller方法后都调用该方法.
+    /**执行indexcontroller方法后都调用该方法.*/
     @After("execution(* com.kiwi.toutiao.controller.IndexController.*(..))")
     public void afterMethod(JoinPoint joinPoint){
         logger.info("after method: ");

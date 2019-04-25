@@ -16,7 +16,7 @@ public class NewsService {
     @Autowired
     private NewsDAO newsDAO;
 
-//    用于展示新的消息
+    /**用于展示新的消息*/
     public List<News> getLatestNews(int userId, int offset, int limit){
         return newsDAO.selectByUserIdAndOffset(userId, offset, limit);
     }
