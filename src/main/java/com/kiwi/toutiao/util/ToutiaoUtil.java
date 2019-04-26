@@ -15,7 +15,23 @@ import java.util.Map;
 public class ToutiaoUtil {
     private static final Logger logger = LoggerFactory.getLogger(ToutiaoUtil.class);
 
+    /**整个域名的前缀，要保证机器有写入权限*/
+    public static String TOUTIAO_DOMAIN = "http://127.0.0.1.8080/";
+    /**本地上传文件列表*/
+    public static String IMAGE_DIR = "D:/upload/";
+    /**图片可能格式*/
+    public static String[] IMAGE_FILE_EXTD = new String[]{"png","bmp","jpg","jpeg"};
 
+    /**对图片扩展名进行判断*/
+    public static boolean isFileAllowed(String fileName){
+        for (String ext: IMAGE_FILE_EXTD){
+            if (ext.equals(fileName))
+                return true;
+        }
+        return false;
+    }
+
+    /**查看调用是否成功，查看code是0还是1*/
     public static String getJSONString(int code){
         JSONObject json = new JSONObject();
         json.put("code", code);
