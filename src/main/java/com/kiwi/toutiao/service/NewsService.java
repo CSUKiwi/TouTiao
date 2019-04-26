@@ -61,4 +61,9 @@ public class NewsService {
         return newsDAO.getById(newsId);
     }
 
+    /**更新评论数*/
+    public int updateCommentCount(int id, int count){
+        return newsDAO.updateCommentCount(id, count);
+    }
+
 }

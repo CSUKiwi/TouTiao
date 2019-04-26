@@ -1,7 +1,7 @@
 package com.kiwi.toutiao.controller;
 
-import com.kiwi.toutiao.model.HostHolder;
-import com.kiwi.toutiao.model.News;
+import com.kiwi.toutiao.model.*;
+import com.kiwi.toutiao.service.CommentService;
 import com.kiwi.toutiao.service.NewsService;
 import com.kiwi.toutiao.service.UserService;
 import com.kiwi.toutiao.util.ToutiaoUtil;
@@ -9,17 +9,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.View;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Kiwi
@@ -39,6 +41,9 @@ public class NewsController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    CommentService commentService;
 
     /**用于图片展示*/
     @RequestMapping(path = {"/image"}, method = {RequestMethod.GET})
@@ -94,5 +99,55 @@ public class NewsController {
             logger.error("添加资讯错误" + e.getMessage());
             return ToutiaoUtil.getJSONString(1, "发布失败");
         }
+    }
+
+    /**新闻详情页*/
+    @RequestMapping(path = {"/news/{newsId}"}, method = {RequestMethod.GET})
+    public String newsDetail(@PathVariable("newsId") int newsId, Model model){
+        News news = newsService.getById(newsId);
+        if (news != null){
+
+
+            //评论，与前端交互
+            List<Comment> comments = commentService.getCommentByEntity(news.getId(), EntityType.ENTITY_NEWS);
+            List<ViewObject>  commentVOs = new ArrayList<>();
+            for (Comment comment : comments){
+                ViewObject vo = new ViewObject();
+                vo.set("comment", comment);
+                vo.set("user", userService.getUser(comment.getUserId()));
+                commentVOs.add(vo);
+            }
+            model.addAttribute("comments", commentVOs);
+        }
+        model.addAttribute("news", news);
+        model.addAttribute("owner", userService.getUser(news.getUserId()));
+        return "detail";
+    }
+
+    /**增加评论*/
+    @RequestMapping(path = {"/addComment"}, method = {RequestMethod.POST})
+    public String addComment(@RequestParam("newsId") int newsId,
+                             @RequestParam("content") String content){
+        try{
+            //过滤content。
+            content = HtmlUtils.htmlEscape(content);
+
+            Comment comment = new Comment();
+            comment.setUserId(hostHolder.getUser().getId());
+            comment.setContent(content);
+            comment.setEntityId(newsId);
+            comment.setEntityType(EntityType.ENTITY_NEWS);
+            comment.setCreatedDate(new Date());
+            comment.setStatus(0);
+
+            commentService.addComment(comment);
+            //更新news里面的评论数
+            int count = commentService.getCommentCount(comment.getEntityId(), comment.getEntityType());
+            newsService.updateCommentCount(comment.getEntityId(), count);
+            //怎么异步化
+        } catch (Exception e){
+            logger.error("增加评论失败" + e.getMessage());
+        }
+        return "redirect:/" + String.valueOf(newsId);
     }
 }

@@ -1,11 +1,10 @@
 package com.kiwi.toutiao;
 
+import com.kiwi.toutiao.dao.CommentDAO;
 import com.kiwi.toutiao.dao.LoginTicketDAO;
 import com.kiwi.toutiao.dao.NewsDAO;
 import com.kiwi.toutiao.dao.UserDAO;
-import com.kiwi.toutiao.model.LoginTicket;
-import com.kiwi.toutiao.model.News;
-import com.kiwi.toutiao.model.User;
+import com.kiwi.toutiao.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +34,9 @@ public class InitDatabaseTests {
 	@Autowired
 	LoginTicketDAO loginTicketDAO;
 
+	@Autowired
+	CommentDAO commentDAO;
+
 	@Test
 	public void initData() {
 		Random random = new Random();
@@ -58,6 +60,17 @@ public class InitDatabaseTests {
 			news.setLink(String.format("http://www.nowcoder.com/%d.html", i));
 			newsDAO.addNews(news);
 
+			for (int j = 0; j < 3; ++j){
+				Comment comment = new Comment();
+				comment.setUserId(i+1);
+				comment.setEntityId(news.getId());
+				comment.setEntityType(EntityType.ENTITY_NEWS);
+				comment.setStatus(0);
+				comment.setCreatedDate(new Date());
+				comment.setContent("这里是一个评论啊" + String.valueOf(j));
+				commentDAO.addComment(comment);
+			}
+
 			user.setPassword("newpassword");
 			userDAO.updatePassword(user);
 
@@ -77,6 +90,8 @@ public class InitDatabaseTests {
 
 		Assert.assertEquals(1, loginTicketDAO.selectByTicket("TICKET1").getUserId());
 		Assert.assertEquals(2, loginTicketDAO.selectByTicket("TICKET1").getStatus());
+
+		Assert.assertNotNull(commentDAO.selectByEntity(1, EntityType.ENTITY_NEWS).get(0));
 
 	}
 
