@@ -2,6 +2,7 @@ package com.kiwi.toutiao.controller;
 
 import com.kiwi.toutiao.model.*;
 import com.kiwi.toutiao.service.CommentService;
+import com.kiwi.toutiao.service.LikeService;
 import com.kiwi.toutiao.service.NewsService;
 import com.kiwi.toutiao.service.UserService;
 import com.kiwi.toutiao.util.ToutiaoUtil;
@@ -16,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.View;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -44,6 +44,9 @@ public class NewsController {
 
     @Autowired
     CommentService commentService;
+
+    @Autowired
+    LikeService likeService;
 
     /**用于图片展示*/
     @RequestMapping(path = {"/image"}, method = {RequestMethod.GET})
@@ -106,7 +109,11 @@ public class NewsController {
     public String newsDetail(@PathVariable("newsId") int newsId, Model model){
         News news = newsService.getById(newsId);
         if (news != null){
-
+            int localUserId = hostHolder.getUser() != null ? hostHolder.getUser().getId() : 0;
+            if (localUserId != 0)
+                model.addAttribute("like", likeService.getLikeStatus(localUserId, EntityType.ENTITY_NEWS, news.getId()));
+            else
+                model.addAttribute("like", 0);
 
             //评论，与前端交互
             List<Comment> comments = commentService.getCommentByEntity(news.getId(), EntityType.ENTITY_NEWS);
