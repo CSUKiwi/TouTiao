@@ -20,6 +20,7 @@ import java.util.Random;
  * @author Kiwi
  * @date 2019/4/16 20:23
  * @Sql用于将文件导入.
+ * 用于测试基本的service功能。
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = ToutiaoApplication.class)

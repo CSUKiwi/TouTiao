@@ -1,5 +1,8 @@
 package com.kiwi.toutiao.controller;
 
+import com.kiwi.toutiao.async.EventModel;
+import com.kiwi.toutiao.async.EventProducer;
+import com.kiwi.toutiao.async.EventType;
 import com.kiwi.toutiao.model.EntityType;
 import com.kiwi.toutiao.model.HostHolder;
 import com.kiwi.toutiao.model.News;
@@ -29,15 +32,23 @@ public class LikeController {
     @Autowired
     NewsService newsService;
 
+    @Autowired
+    EventProducer eventProducer;
+
     /**喜欢*/
     @RequestMapping(path = {"/like"}, method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public String like(@Param("newsId") int newsId){
         long likeCount = likeService.like(hostHolder.getUser().getId(), EntityType.ENTITY_NEWS, newsId);
 
+        //更新喜欢数
         News news = newsService.getById(newsId);
         newsService.updateCommentCount(newsId, (int)likeCount);
 
+        //把当时的情况记录下来,利用队列。
+        eventProducer.fireEvent(new EventModel(EventType.LIKE)
+                    .setActorId(hostHolder.getUser().getId()).setEntityId(newsId)
+        .setEntityType(EntityType.ENTITY_NEWS).setEntityOwnerId(news.getUserId()));
         return ToutiaoUtil.getJSONString(0, String.valueOf(likeCount));
     }
 

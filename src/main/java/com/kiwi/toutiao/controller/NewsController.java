@@ -1,10 +1,7 @@
 package com.kiwi.toutiao.controller;
 
 import com.kiwi.toutiao.model.*;
-import com.kiwi.toutiao.service.CommentService;
-import com.kiwi.toutiao.service.LikeService;
-import com.kiwi.toutiao.service.NewsService;
-import com.kiwi.toutiao.service.UserService;
+import com.kiwi.toutiao.service.*;
 import com.kiwi.toutiao.util.ToutiaoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +45,9 @@ public class NewsController {
     @Autowired
     LikeService likeService;
 
+    @Autowired
+    QiniuService qiniuService;
+
     /**用于图片展示*/
     @RequestMapping(path = {"/image"}, method = {RequestMethod.GET})
     @ResponseBody
@@ -68,7 +68,9 @@ public class NewsController {
     @ResponseBody
     public String uploadImage(@RequestParam("file") MultipartFile file){
         try{
-            String fileUrl = newsService.saveImage(file);
+            //String fileUrl = newsService.saveImage(file);
+            //通过七牛来上传
+            String fileUrl = qiniuService.saveImage(file);
             if (fileUrl == null)
                 return ToutiaoUtil.getJSONString(1, "上传图片失败");
             return ToutiaoUtil.getJSONString(0, fileUrl);

@@ -1,6 +1,9 @@
 package com.kiwi.toutiao.controller;
 
 
+import com.kiwi.toutiao.async.EventModel;
+import com.kiwi.toutiao.async.EventProducer;
+import com.kiwi.toutiao.async.EventType;
 import com.kiwi.toutiao.service.UserService;
 import com.kiwi.toutiao.util.ToutiaoUtil;
 import org.slf4j.Logger;
@@ -23,6 +26,9 @@ public class LoginController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    EventProducer eventProducer;
 
 
     /**用于注册*/
@@ -69,7 +75,13 @@ public class LoginController {
                 if (rememberme > 0){
                     cookie.setMaxAge(3600*24*5);
                 }
+                //用于登陆，没有的话登陆失败
                 response.addCookie(cookie);
+
+                eventProducer.fireEvent(new EventModel(EventType.LOGIN)
+                            .setActorId((int)map.get("userId"))
+                            .setExt("username", username)
+                            .setExt("email", "zjuxy@qq.com"));
                 return ToutiaoUtil.getJSONString(0, "登陆成功");
             } else {
                 return ToutiaoUtil.getJSONString(1, "登陆异常");

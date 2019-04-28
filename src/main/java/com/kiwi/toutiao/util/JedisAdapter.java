@@ -167,17 +167,16 @@ public class JedisAdapter implements InitializingBean {
     }
 
 
-    /**直接存储一个对象*/
+    /**直接存储一个对象，用于队列*/
     public void setObject(String key, Object obj) {
         set(key, JSON.toJSONString(obj));
     }
 
-    /**取出对象*/
+    /**取出对象，用于队列*/
     public <T> T getObject(String key, Class<T> clazz) {
         String value = get(key);
-        if (value != null) {
+        if (value != null)
             return JSON.parseObject(value, clazz);
-        }
         return null;
     }
 
